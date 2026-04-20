@@ -10,6 +10,7 @@ import static de.volodymyr.learning.ActivityService.GitHubService.displayActivit
 import static de.volodymyr.learning.ActivityService.GitHubService.getEventsAsList;
 
 public class Main {
+
     public static void main(String[] args) {
         try {
             if (args.length < 1){
