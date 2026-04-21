@@ -2,9 +2,7 @@ package de.volodymyr.learning.ActivityService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import de.volodymyr.learning.cache.JsonConfig;
 import de.volodymyr.learning.models.GitHubEvent;
 
 
@@ -19,12 +17,10 @@ public class GitHubService {
     public static Optional<List<GitHubEvent>> getEventsAsList(String json) {
         if (json == null || json.isBlank()) return Optional.empty();
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 
         try {
-            List<GitHubEvent> events = mapper.readValue(json, new TypeReference<List<GitHubEvent>>() {});
+            List<GitHubEvent> events = JsonConfig.getMAPPER().readValue(json, new TypeReference<List<GitHubEvent>>() {});
             return Optional.of(events);
         } catch (JsonProcessingException e) {
             System.err.println("Parsing error: " + e.getMessage());

@@ -25,7 +25,7 @@ public class Main {
             listEvents.ifPresent(GitHubService::displayActivity);
 
             if (listEvents.isEmpty()){
-                System.out.println("Could not retrieve data for user" + args[0] + ". Check connection or username.");
+                System.out.println("Could not retrieve data for user: " + args[0] + ". Check connection or username.");
             }
 
     }

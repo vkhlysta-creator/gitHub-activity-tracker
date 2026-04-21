@@ -8,11 +8,12 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Optional;
 
 public class GitHubClient {
 
 
-    public static String fetchRawEvents(String username) throws URISyntaxException, UserNotFound {
+    public static Optional<String> fetchRawEvents(String username) throws URISyntaxException, UserNotFound {
 
         try (HttpClient client = HttpClient.newHttpClient()) {
 
@@ -22,16 +23,16 @@ public class GitHubClient {
                 if (response.statusCode() == 404) {
                     throw new UserNotFound("User not found");
                 }
-                return response.body();
+                return Optional.of(response.body());
             } catch (IOException e) {
-                System.out.println("IOException: ");
+                System.err.println("IOException: Network error " + e.getMessage());
             } catch (InterruptedException e) {
-                System.out.println("InterruptedException");
+                System.err.println("Network error: " + e.getMessage());
             }
 
         }
 
 
-        return "";
+        return Optional.empty();
     }
 }
