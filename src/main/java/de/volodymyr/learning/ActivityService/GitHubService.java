@@ -1,33 +1,35 @@
 package de.volodymyr.learning.ActivityService;
 
-import de.volodymyr.learning.GitHubClient.GitHubClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.volodymyr.learning.models.GitHubEvent;
-import de.volodymyr.learning.exceptions.UserNotFound;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.net.URISyntaxException;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
 public class GitHubService {
 
-    public static void main(String[] args) {
-        try {
-            displayActivity(getEventsAsList(GitHubClient.fetchRawEvents("almasi")));
-        } catch (URISyntaxException e) {
-            System.out.println("URL Syntax");
-        } catch (UserNotFound e) {
-            System.out.println("User not Found. Check the spelling");
-        }
-    }
 
-    public static List<GitHubEvent> getEventsAsList(String json) {
+    public static Optional<List<GitHubEvent>> getEventsAsList(String json) {
+        if (json == null || json.isBlank()) return Optional.empty();
+
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(json, new TypeReference<>() {
-        });
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+        try {
+            List<GitHubEvent> events = mapper.readValue(json, new TypeReference<List<GitHubEvent>>() {});
+            return Optional.of(events);
+        } catch (JsonProcessingException e) {
+            System.err.println("Parsing error: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public static void displayActivity(List<GitHubEvent> events) {
