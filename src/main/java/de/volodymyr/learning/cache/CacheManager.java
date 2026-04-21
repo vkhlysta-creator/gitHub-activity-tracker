@@ -1,8 +1,5 @@
 package de.volodymyr.learning.cache;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.volodymyr.learning.ActivityService.GitHubService;
 import de.volodymyr.learning.GitHubClient.GitHubClient;
 import de.volodymyr.learning.exceptions.UserNotFound;
@@ -26,17 +23,17 @@ public class CacheManager {
         return CACHEPATH;
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 
     public static Optional<CacheData> fetchFreshCache(String username) {
         try {
-            String json = GitHubClient.fetchRawEvents(username);
+            Optional<String> json = GitHubClient.fetchRawEvents(username);
+            if (json.isPresent()) {
 
-            return GitHubService.getEventsAsList(json)
-                    .map(events -> new CacheData(LocalDateTime.now(), events));
 
+                return GitHubService.getEventsAsList(json.get())
+                        .map(events -> new CacheData(LocalDateTime.now(), events));
+            }
         } catch (UserNotFound e) {
             System.err.println("User not found: " + username);
         } catch (URISyntaxException e) {
@@ -54,7 +51,7 @@ public class CacheManager {
         try {
             Files.createDirectories(usersPath.getParent());
 
-            MAPPER.writeValue(usersPath.toFile(), data);
+            JsonConfig.getMAPPER().writeValue(usersPath.toFile(), data);
 
         } catch (IOException e) {
             System.err.println("Failed to save cache for " + username + ": " + e.getMessage());
@@ -66,7 +63,7 @@ public class CacheManager {
 
         if (Files.exists(usersPath)) {
             try {
-                CacheData result = MAPPER.readValue(usersPath.toFile(), CacheData.class);
+                CacheData result = JsonConfig.getMAPPER().readValue(usersPath.toFile(), CacheData.class);
                 return Optional.of(result);
             } catch (IOException e) {
                 System.err.println("IOException while reading File for: " + username + " Message: " + e.getMessage());
