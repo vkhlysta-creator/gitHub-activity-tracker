@@ -63,3 +63,4 @@ Optional to handle potential null values from the API.
 Strict Jackson configuration to ignore unknown properties.
 
 Custom JsonProperty mapping to bridge the gap between GitHub's snake_case and Java's camelCase.
+https://roadmap.sh/projects/github-user-activity
