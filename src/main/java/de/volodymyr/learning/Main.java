@@ -1,26 +1,32 @@
 package de.volodymyr.learning;
 
 
-import de.volodymyr.learning.GitHubClient.GitHubClient;
-import de.volodymyr.learning.exceptions.UserNotFound;
+import de.volodymyr.learning.ActivityService.GitHubService;
 
-import java.net.URISyntaxException;
+import de.volodymyr.learning.cache.CacheManager;
 
-import static de.volodymyr.learning.ActivityService.GitHubService.displayActivity;
-import static de.volodymyr.learning.ActivityService.GitHubService.getEventsAsList;
+import de.volodymyr.learning.models.GitHubEvent;
+
+
+import java.util.List;
+import java.util.Optional;
+
+
 
 public class Main {
     public static void main(String[] args) {
-        try {
+
             if (args.length < 1){
                 System.out.println("Guide: github-activity <username>");
                 return;
             }
-            displayActivity(getEventsAsList(GitHubClient.fetchRawEvents(args[0])));
-        } catch (URISyntaxException e) {
-            System.out.println("URL Syntax");
-        } catch (UserNotFound e) {
-            System.out.println("User not Found. Check the spelling");
-        }
+
+            Optional<List<GitHubEvent>> listEvents = CacheManager.getCache(args[0]);
+            listEvents.ifPresent(GitHubService::displayActivity);
+
+            if (listEvents.isEmpty()){
+                System.out.println("Could not retrieve data for user" + args[0] + ". Check connection or username.");
+            }
+
     }
 }
